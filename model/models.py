@@ -39,7 +39,10 @@ class RandomForest(Model):
     def __init__(self):
         self.model = ensemble.RandomForestClassifier(
             n_jobs=-1,
-            random_state=123
+            random_state=123,
+            criterion='gini',
+            max_depth=4,
+            n_estimators=30
             )
     
 
@@ -48,7 +51,8 @@ class RandomForest(Model):
             raise Exception('Please specify the model first!!')
 
         sfm = feature_selection.SelectFromModel(
-            estimator=self.model
+            estimator=self.model,
+            threshold=0.06
         )
         sfm.fit(x_train,y_train)
         support = sfm.get_support()
