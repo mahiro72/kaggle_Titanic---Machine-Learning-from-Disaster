@@ -34,7 +34,6 @@ def run():
         'Sex','Embarked','Sex_Pclass'
     ]
 
-    
     for col in categorical_columns:
         lbl = preprocessing.LabelEncoder()
         lbl.fit(df[col])
