@@ -15,20 +15,25 @@ def run():
     test = pd.read_csv(r'input\test.csv')
     train = pd.read_csv(r'input\train.csv')
 
-    drop_columns = ['Name','Ticket','Cabin']
+    drop_columns = ['Name','Ticket','Cabin','SibSp','Parch']
 
     df = pd.concat([train,test]).reset_index(drop=True)
-    df = df.drop(drop_columns,axis=1)
+
+    df['existCabin'] = df['Cabin'].copy()
+    df['existCabin'] = df.existCabin.fillna(0)
+    df.loc[df.existCabin!=0,'existCabin'] = 1
 
     df['Age'] = df.Age.fillna(df['Age'].median())
     df['Embarked'] = df.Embarked.fillna(df['Embarked'].mode())
     df['Fare'] = df.Fare.fillna(df['Fare'].median())
 
-
     df['Sex_Pclass'] = (
         df.Sex.astype(str)+"_"+df.Pclass.astype(str)
     )
+    df['Familysize'] = df['SibSp']+df['Parch']+1
 
+
+    df = df.drop(drop_columns,axis=1)
 
     categorical_columns = [
         'Sex','Embarked','Sex_Pclass'
@@ -69,19 +74,16 @@ def run():
     model.fit(X_train,y_train)
     
     y_pre = model.predict(X_val)
-
-    
-    
+    print(sfm_columns)
     print(f'score={rf.accuracy_score(y_val,y_pre)}')
 
 
     """ submit """
-    y_pre_sub = model.predict(test)
-    rf.submit(
-        y_predict=y_pre_sub,
-        name='rf_sfm_sec'
-    )
-
+    # y_pre_sub = model.predict(test)
+    # rf.submit(
+    #     y_predict=y_pre_sub,
+    #     name='rf_third'
+    # )
 
 
 if __name__ == "__main__":

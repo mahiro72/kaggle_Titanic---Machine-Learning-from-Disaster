@@ -1,4 +1,3 @@
-/input/*.csv
-*.zip
-/sub/*.csv
 /notebooks
+/img
+*.csv

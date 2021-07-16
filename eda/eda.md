@@ -1,4 +1,4 @@
-# jupyter notebook 用のフォルダー
-edaとかにで使ってください
+# Explanatory Data Analysis 用のフォルダー
+## 探索的データ解析(eda)
 
-sample_eda参考に
+edaとかで使ってください
