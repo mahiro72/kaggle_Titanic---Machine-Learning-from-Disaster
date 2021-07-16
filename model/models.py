@@ -38,7 +38,8 @@ class LogisticRegression(Model):
 class RandomForest(Model):
     def __init__(self):
         self.model = ensemble.RandomForestClassifier(
-            n_jobs=-1
+            n_jobs=-1,
+            random_state=123
             )
     
 

@@ -49,10 +49,11 @@ def run():
     X_train, X_val, y_train, y_val = train_test_split(
         train.drop('Survived',axis = 1),
         train['Survived'],
-        test_size=0.4
+        test_size=0.3,
+        random_state=123
     )
 
-    
+
 
     rf = RandomForest()
 
@@ -79,7 +80,7 @@ def run():
     y_pre_sub = model.predict(test)
     rf.submit(
         y_predict=y_pre_sub,
-        name='rf_sfm'
+        name='rf_sfm_sec'
     )
 
 
