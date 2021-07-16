@@ -8,7 +8,7 @@ import pandas as pd
 from sklearn import feature_selection
 
 
-class Model():
+class Model:
     def __init__(self):
         self.model = None
 
