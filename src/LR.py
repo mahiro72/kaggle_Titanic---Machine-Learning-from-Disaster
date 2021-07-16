@@ -39,6 +39,6 @@ y_pre = model.predict(test)
 print(y_pre)
 
 
-# sub = pd.read_csv(r'input\gender_submission.csv')
-# sub['Survived'] = y_pre
-# sub.to_csv(r'sub\submission2.csv',index=False)
+sub = pd.read_csv(r'input\gender_submission.csv')
+sub['Survived'] = y_pre
+sub.to_csv(r'sub\submission2.csv',index=False)

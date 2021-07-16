@@ -1,3 +1,4 @@
+from numpy.lib.twodim_base import tri
 import pandas as pd
 import numpy as np
 import sklearn
@@ -5,6 +6,8 @@ import lightgbm as lgb
 from sklearn.model_selection import train_test_split
 from sklearn import preprocessing 
 from sklearn.metrics import accuracy_score
+import optuna
+
 
 test = pd.read_csv(r'input\test.csv')
 train = pd.read_csv(r'input\train.csv')
@@ -27,6 +30,7 @@ df['Sex_Pclass'] = (
 categorical_columns = [
     'Sex','Embarked','Sex_Pclass'
 ]
+
 for col in categorical_columns:
     lbl = preprocessing.LabelEncoder()
     lbl.fit(df[col])
@@ -48,8 +52,26 @@ X_train, X_val, y_train, y_val = train_test_split(
 lgb_train = lgb.Dataset(X_train,y_train,categorical_feature = categorical_columns)
 lgb_eval = lgb.Dataset(X_val,y_val,reference=lgb_train, categorical_feature = categorical_columns)
 
+def objective(trial):
+    x = trial.suggest_uniform('x', -10, 10)
+    score = (x-2)**2
+    print('x: %1.3f, score: %1.3f' % (x, score))
+    return score
+
+study = optuna.create_study()
+study.optimize(objective, n_trials=100)
+
+
 params = {
-    'objective': 'binary'
+    'objective': 'binary',
+    'metric': 'binary_logloss',
+    'lambda_l1': optuna.trial.suggest_loguniform('lambda_l1', 1e-8, 10.0),
+    # 'lambda_l2': optuna.trial.suggest_loguniform('lambda_l2', 1e-8, 10.0),
+    # 'num_leaves': optuna.trial.suggest_int('num_leaves', 2, 256),
+    # 'feature_fraction': optuna.trial.suggest_uniform('feature_fraction', 0.4, 1.0),
+    # 'bagging_fraction': optuna.trial.suggest_uniform('bagging_fraction',0.4, 1.0),
+    # 'bagging_freq': optuna.trial.suggest_int('bagging_freq', 1, 7),
+    # 'min_child_samples': optuna.trial.suggest_int('min_child_samples',5 ,100),
 }
 
 model = lgb.train(params,lgb_train,valid_sets=lgb_eval,verbose_eval=10,num_boost_round=1000,early_stopping_rounds=10)
@@ -66,6 +88,4 @@ sub.to_csv(r'sub\submission_'+str('lgb_sec')+'.csv',index=False)
 
 
 
-# sub = pd.read_csv(r'input\gender_submission.csv')
-# sub['Survived'] = y_pre
-# sub.to_csv(r'sub\submission2.csv',index=False)
+
