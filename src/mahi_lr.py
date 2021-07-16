@@ -60,32 +60,26 @@ def run():
 
 
 
-    rf = RandomForest()
+    lr = LogisticRegression()
 
-    model = rf.model
+    model = lr.model
 
-    sfm_columns = rf.sfm(X_train,y_train,test.columns)
 
-    X_train = X_train[sfm_columns]
-    X_val = X_val[sfm_columns]
-
-    test = test[sfm_columns]
 
 
     model.fit(X_train,y_train)
     
     y_pre = model.predict(X_val)
-    print(sfm_columns)
-    im_f = pd.DataFrame(model.feature_importances_,index=test.columns,columns=['importance'])
-    print(im_f)
-    print(f'score={rf.accuracy_score(y_val,y_pre)}')
+
+
+    print(f'score={lr.accuracy_score(y_val,y_pre)}')
 
 
     """ submit """
     y_pre_sub = model.predict(test)
-    rf.submit(
+    lr.submit(
         y_predict=y_pre_sub,
-        name='rf_7_17'
+        name='lr_7_17'
     )
 
 

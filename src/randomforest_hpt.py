@@ -1,9 +1,18 @@
 import pandas as pd
 import numpy as np
 import sys,os
-from pandas.core.base import DataError
 from sklearn import preprocessing
 import matplotlib.pyplot as plt
+
+
+from tqdm import tqdm
+from sklearn.datasets import load_breast_cancer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import f1_score
+
+
 
 
 sys.path.append(os.path.abspath("."))
@@ -16,7 +25,7 @@ def run():
     test = pd.read_csv(r'input\test.csv')
     train = pd.read_csv(r'input\train.csv')
 
-    drop_columns = ['Name','Ticket','Cabin','SibSp','Parch','Sex']
+    drop_columns = ['Name','Ticket','Cabin','SibSp','Parch']
 
     df = pd.concat([train,test]).reset_index(drop=True)
 
@@ -37,7 +46,7 @@ def run():
     df = df.drop(drop_columns,axis=1)
 
     categorical_columns = [
-        'Embarked','Sex_Pclass'
+        'Sex','Embarked','Sex_Pclass'
     ]
 
     for col in categorical_columns:
@@ -57,37 +66,48 @@ def run():
         test_size=0.3,
         random_state=123
     )
-
-
-
-    rf = RandomForest()
-
-    model = rf.model
-
-    sfm_columns = rf.sfm(X_train,y_train,test.columns)
-
-    X_train = X_train[sfm_columns]
-    X_val = X_val[sfm_columns]
-
-    test = test[sfm_columns]
-
-
-    model.fit(X_train,y_train)
     
-    y_pre = model.predict(X_val)
-    print(sfm_columns)
-    im_f = pd.DataFrame(model.feature_importances_,index=test.columns,columns=['importance'])
-    print(im_f)
-    print(f'score={rf.accuracy_score(y_val,y_pre)}')
+    #条件設定
+    max_score = 0
+    SearchMethod = 0
+    RFC_grid = {RandomForestClassifier(): {"n_estimators": [i for i in range(1, 50)],
+                                        "criterion": ["gini", "entropy"],
+                                        "max_depth":[i for i in range(1, 20)]
+                                        }}
+
+    #ランダムフォレストの実行
+    for model, param in tqdm(RFC_grid.items()):
+        print(model)
+        clf = GridSearchCV(model, param)
+        clf.fit(X_train, y_train)
+        y_pred = clf.predict(X_val)
+        score = f1_score(y_val, y_pred, average="micro")
+
+        if max_score < score:
+            max_score = score
+            best_param = clf.best_params_
+            best_model = model.__class__.__name__
+
+    print("ベストスコア:{}".format(max_score))
+    print("モデル:{}".format(best_model))
+    print("パラメーター:{}".format(best_param))
+
+
+
+
+
 
 
     """ submit """
-    y_pre_sub = model.predict(test)
-    rf.submit(
-        y_predict=y_pre_sub,
-        name='rf_7_17'
-    )
+    # y_pre_sub = model.predict(test)
+    # rf.submit(
+    #     y_predict=y_pre_sub,
+    #     name='rf_third'
+    # )
 
 
 if __name__ == "__main__":
     run()
+
+
+
