@@ -46,13 +46,13 @@ class RandomForest(Model):
             )
     
 
-    def sfm(self,x_train,y_train,features):
+    def sfm(self,x_train,y_train,features,threshold):
         if self.model == None:
             raise Exception('Please specify the model first!!')
 
         sfm = feature_selection.SelectFromModel(
             estimator=self.model,
-            threshold=0.06
+            threshold=threshold
         )
         sfm.fit(x_train,y_train)
         support = sfm.get_support()
@@ -63,14 +63,23 @@ class RandomForest(Model):
 
     
 class XGBoost(Model):
-    def __init__(self):
-        self.model = xgb.XGBClassifier(
-        n_jobs=-1,
-        max_depth=7,
-        n_estimators=200,
-        eval_metric='mlogloss'
-    )
+    def __init__(self,X_train,y_train,X_val,y_val,**params):
 
-
-
-
+        dtrain = xgb.DMatrix(X_train, label=y_train)
+        dvalid = xgb.DMatrix(X_val, label=y_val)
+          
+        params = params
+        num_round = 500
+        watchlist = [(dtrain, 'train'), (dvalid, 'eval')]#訓練データはdtrain、評価用のテストデータはdvalidと設定
+        
+        self.model = xgb.train(params,
+                        dtrain,#訓練データ
+                        num_round,#設定した学習回数
+                        early_stopping_rounds=20,
+                        evals=watchlist,
+                        )
+    
+    def predict(self,data):
+        d_data = xgb.DMatrix(data)
+        y_pre = self.model.predict(d_data)
+        return y_pre
